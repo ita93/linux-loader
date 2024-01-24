@@ -349,7 +349,7 @@ impl Cmdline {
 
     /// Returns a C compatible representation of the command line
     /// The Linux kernel expects a null terminated cmdline according to the source:
-    /// https://elixir.bootlin.com/linux/v5.10.139/source/kernel/params.c#L179
+    /// <https://elixir.bootlin.com/linux/v5.10.139/source/kernel/params.c#L179>
     ///
     /// To get bytes of the cmdline to be written in guest's memory (including the
     /// null terminator) from this representation, use CString::as_bytes_with_nul()
@@ -458,12 +458,14 @@ impl Cmdline {
         slug.matches('\"').count() % 2 == 0
     }
 
-    /// Tries to build a [`Cmdline`] with a given capacity from a str. The format of the
-    /// str provided must be one of the followings:
-    /// -> <boot args> -- <init args>
-    /// -> <boot args>
-    /// where <boot args> and <init args> can contain '--' only if double quoted and
-    /// <boot args> and <init args> contain at least one non-whitespace char each.
+    /// Tries to build a [`Cmdline`] with a given capacity from a [`str`]. The format of the
+    /// str provided must be one of the following:
+    ///
+    /// * `<boot args> -- <init args>`
+    /// * `<boot args>`
+    ///
+    /// where `<boot args>` and `<init args>` can contain `--` only if double quoted and
+    /// `<boot args>` and `<init args>` contain at least one non-whitespace char each.
     ///
     /// Providing a str not following these rules might end up in undefined behaviour of
     /// the resulting `Cmdline`.

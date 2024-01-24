@@ -1,4 +1,16 @@
-# Unreleased
+# [v0.11.0]
+
+## Changed
+
+- [[#173](https://github.com/rust-vmm/linux-loader/pull/173)] Updated vm-memory to 0.14.0.
+- [[#170](https://github.com/rust-vmm/linux-loader/pull/170)] Added all features to the generated docs.rs documentation.
+
+# [v0.10.0]
+
+## Changed
+
+- [[#162](https://github.com/rust-vmm/linux-loader/pull/162)] Updated vm-memory to 0.13.0.
+  This introduces a `ReadVolatile` bound on `KernelLoader::load`.
 
 # [v0.9.1]
 

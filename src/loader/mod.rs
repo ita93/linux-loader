@@ -24,7 +24,7 @@ use std::io::{Read, Seek};
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use vm_memory::ByteValued;
-use vm_memory::{Address, Bytes, GuestAddress, GuestMemory, GuestUsize};
+use vm_memory::{Address, Bytes, GuestAddress, GuestMemory, GuestUsize, ReadVolatile};
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub use crate::loader_gen::bootparam;
@@ -147,12 +147,12 @@ pub struct KernelLoaderResult {
     /// blob and initrd will be loaded adjacent to kernel image.
     pub kernel_end: GuestUsize,
     /// Configuration for the VMM to use to fill zero page for bzImage direct boot.
-    /// See https://www.kernel.org/doc/Documentation/x86/boot.txt.
+    /// See <https://www.kernel.org/doc/Documentation/x86/boot.txt>.
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     pub setup_header: Option<bootparam::setup_header>,
     /// Availability of a PVH entry point. Only used for ELF boot, indicates whether the kernel
     /// supports the PVH boot protocol as described in:
-    /// https://xenbits.xen.org/docs/unstable/misc/pvh.html
+    /// <https://xenbits.xen.org/docs/unstable/misc/pvh.html>
     #[cfg(all(feature = "elf", any(target_arch = "x86", target_arch = "x86_64")))]
     pub pvh_boot_cap: elf::PvhBootCapability,
 }
@@ -176,7 +176,7 @@ pub trait KernelLoader {
         highmem_start_address: Option<GuestAddress>,
     ) -> Result<KernelLoaderResult>
     where
-        F: Read + Seek;
+        F: Read + ReadVolatile + Seek;
 }
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
