@@ -31,15 +31,20 @@ pub use crate::loader_gen::bootparam;
 
 pub use crate::cmdline::Cmdline;
 
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-mod x86_64;
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-pub use x86_64::*;
+#[cfg(all(any(target_arch = "aarch64", target_arch = "riscv64"), feature = "pe"))]
+pub mod pe;
+#[cfg(all(any(target_arch = "aarch64", target_arch = "riscv64"), feature = "pe"))]
+pub use pe::*;
 
-#[cfg(target_arch = "aarch64")]
-mod aarch64;
-#[cfg(target_arch = "aarch64")]
-pub use aarch64::*;
+#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), feature = "elf"))]
+pub mod elf;
+#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), feature = "elf"))]
+pub use elf::*;
+
+#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), feature = "bzimage"))]
+pub mod bzimage;
+#[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), feature = "bzimage"))]
+pub use bzimage::*;
 
 #[derive(Debug, PartialEq, Eq)]
 /// Kernel loader errors.
@@ -53,7 +58,7 @@ pub enum Error {
     Elf(elf::Error),
 
     /// Failed to load PE image.
-    #[cfg(all(feature = "pe", target_arch = "aarch64"))]
+    #[cfg(all(feature = "pe", any(target_arch = "aarch64", target_arch = "riscv64")))]
     Pe(pe::Error),
 
     /// Invalid command line.
@@ -75,22 +80,21 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let desc = match self {
+        write!(f, "Kernel Loader: ")?;
+        match self {
             #[cfg(all(feature = "bzimage", any(target_arch = "x86", target_arch = "x86_64")))]
-            Error::Bzimage(ref _e) => "failed to load bzImage kernel image",
+            Error::Bzimage(ref e) => write!(f, "failed to load bzImage kernel image: {e}"),
             #[cfg(all(feature = "elf", any(target_arch = "x86", target_arch = "x86_64")))]
-            Error::Elf(ref _e) => "failed to load ELF kernel image",
-            #[cfg(all(feature = "pe", target_arch = "aarch64"))]
-            Error::Pe(ref _e) => "failed to load PE kernel image",
+            Error::Elf(ref e) => write!(f, "failed to load ELF kernel image: {e}"),
+            #[cfg(all(feature = "pe", any(target_arch = "aarch64", target_arch = "riscv64")))]
+            Error::Pe(ref e) => write!(f, "failed to load PE kernel image: {e}"),
 
-            Error::InvalidCommandLine => "invalid command line provided",
-            Error::CommandLineCopy => "failed writing command line to guest memory",
-            Error::CommandLineOverflow => "command line overflowed guest memory",
-            Error::InvalidKernelStartAddress => "invalid kernel start address",
-            Error::MemoryOverflow => "memory to load kernel image is not enough",
-        };
-
-        write!(f, "Kernel Loader: {}", desc)
+            Error::InvalidCommandLine => write!(f, "invalid command line provided"),
+            Error::CommandLineCopy => write!(f, "failed writing command line to guest memory"),
+            Error::CommandLineOverflow => write!(f, "command line overflowed guest memory"),
+            Error::InvalidKernelStartAddress => write!(f, "invalid kernel start address"),
+            Error::MemoryOverflow => write!(f, "memory to load kernel image is not enough"),
+        }
     }
 }
 
@@ -101,7 +105,7 @@ impl std::error::Error for Error {
             Error::Bzimage(ref e) => Some(e),
             #[cfg(all(feature = "elf", any(target_arch = "x86", target_arch = "x86_64")))]
             Error::Elf(ref e) => Some(e),
-            #[cfg(all(feature = "pe", target_arch = "aarch64"))]
+            #[cfg(all(feature = "pe", any(target_arch = "aarch64", target_arch = "riscv64")))]
             Error::Pe(ref e) => Some(e),
 
             Error::InvalidCommandLine => None,
@@ -127,7 +131,7 @@ impl From<bzimage::Error> for Error {
     }
 }
 
-#[cfg(all(feature = "pe", target_arch = "aarch64"))]
+#[cfg(all(feature = "pe", any(target_arch = "aarch64", target_arch = "riscv64")))]
 impl From<pe::Error> for Error {
     fn from(err: pe::Error) -> Self {
         Error::Pe(err)

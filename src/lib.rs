@@ -22,6 +22,7 @@
 //!
 //! - `x86_64`
 //! - `ARM64`
+//! - `RISC-V64`
 //!
 //! # Example - load an ELF kernel and configure boot params with the PVH protocol
 //!
@@ -68,7 +69,7 @@
 //!     let mut elf_pvh_image = Vec::new();
 //!     let path = concat!(
 //!         env!("CARGO_MANIFEST_DIR"),
-//!         "/src/loader/x86_64/elf/test_elfnote.bin"
+//!         "/src/loader/elf/test_elfnote.bin"
 //!     );
 //!     let mut file = File::open(path).unwrap();
 //!     file.read_to_end(&mut elf_pvh_image).unwrap();
@@ -91,7 +92,7 @@
 //!     PvhBootConfigurator::write_bootparams::<GuestMemoryMmap>(&boot_params, &guest_mem).unwrap();
 //! }
 //!
-//! # #[cfg(target_arch = "aarch64")]
+//! # #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 //! # fn main() {}
 //! ```
 //!
